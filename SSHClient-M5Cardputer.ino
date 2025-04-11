@@ -3,8 +3,8 @@
 #include "libssh_esp32.h"
 #include <libssh/libssh.h>
 
-const char* ssid = "Your_SSID"; // Replace with your WiFi SSID
-const char* password = "Your_Password"; // Replace with your WiFi password
+String ssid = "";
+String password = "";
 
 // SSH server configuration (initialize as empty strings)
 String ssh_host = "";
@@ -33,6 +33,15 @@ void setup() {
     M5Cardputer.Display.setRotation(1);
     M5Cardputer.Display.setTextSize(1); // Set text size
 
+    // Initialize the cursor Y position
+    cursorY = M5Cardputer.Display.getCursorY();
+
+    // Prompt for WiFi ssid and password
+    M5Cardputer.Display.print("SSID: ");
+    waitForInput(ssid);
+    M5Cardputer.Display.print("\nPassword: ");
+    waitForInput(password);
+
     // Connect to WiFi
     WiFi.begin(ssid, password);
     while (WiFi.status() != WL_CONNECTED) {
@@ -41,11 +50,8 @@ void setup() {
     }
     Serial.println("\nWiFi Connected");
 
-    // Initialize the cursor Y position
-    cursorY = M5Cardputer.Display.getCursorY();
-
     // Prompt for SSH host, username, and password
-    M5Cardputer.Display.print("SSH Host: ");
+    M5Cardputer.Display.print("\nSSH Host: ");
     waitForInput(ssh_host);
     M5Cardputer.Display.print("\nSSH Username: ");
     waitForInput(ssh_user);
@@ -245,7 +251,7 @@ void waitForInput(String& input) {
             }
         }
 
-        if (millis() - startTime > 180000) { // Timeout after 3 minutes
+        if (millis() - startTime > 300000) { // Timeout after 3 minutes
             M5Cardputer.Display.println("\nInput timeout. Rebooting...");
             delay(1000); // Delay for 1 second to allow the message to be displayed
             ESP.restart(); // Reboot the ESP32
