@@ -32,7 +32,6 @@ ssh_channel channel;
 bool filterAnsiSequences = true; // Set to false to disable ANSI sequence filtering
 
 void setDefaultWiFiCredentials(int foundNetworks) {
-    Serial.println("Found these networks:");
     for (int i = 0; i < foundNetworks; i++) {
         String ssidToCompare = WiFi.SSID(i);
         for (int j = 0; j < WIFI_CREDENTIALS_COUNT; j++) {
