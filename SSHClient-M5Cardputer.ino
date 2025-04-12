@@ -3,6 +3,13 @@
 #include "libssh_esp32.h"
 #include <libssh/libssh.h>
 
+#define WIFI_CREDENTIALS_COUNT 3
+const String WIFI_CREDENTIALS[WIFI_CREDENTIALS_COUNT][2] = {
+  { "ssid1", "pass1" },
+  { "ssid2", "pass2" },
+  { "ssid3", "pass3" }
+};
+
 String ssid = "";
 String password = "";
 
@@ -24,6 +31,21 @@ ssh_channel channel;
 
 bool filterAnsiSequences = true; // Set to false to disable ANSI sequence filtering
 
+void setDefaultWiFiCredentials(int foundNetworks) {
+    Serial.println("Found these networks:");
+    for (int i = 0; i < foundNetworks; i++) {
+        String ssidToCompare = WiFi.SSID(i);
+        for (int j = 0; j < WIFI_CREDENTIALS_COUNT; j++) {
+            String possibleSsid = WIFI_CREDENTIALS[j][0];
+            if (ssidToCompare == possibleSsid) {
+                ssid = possibleSsid;
+                password = WIFI_CREDENTIALS[j][1];
+                return;
+            }
+        }
+    }
+}
+
 void setup() {
     Serial.begin(115200); // Initialize serial communication for debugging
     Serial.println("Starting Setup");
@@ -36,11 +58,20 @@ void setup() {
     // Initialize the cursor Y position
     cursorY = M5Cardputer.Display.getCursorY();
 
-    // Prompt for WiFi ssid and password
-    M5Cardputer.Display.print("SSID: ");
-    waitForInput(ssid);
-    M5Cardputer.Display.print("\nPassword: ");
-    waitForInput(password);
+    // Scan WiFi networks
+    WiFi.mode(WIFI_STA);
+    WiFi.disconnect();
+    delay(100);
+    const int networksFound = WiFi.scanNetworks();
+    setDefaultWiFiCredentials(networksFound);
+
+    // Prompt for WiFi ssid and password if no known network found
+    if (ssid.isEmpty()) {
+        M5Cardputer.Display.print("SSID: ");
+        waitForInput(ssid);
+        M5Cardputer.Display.print("\nPassword: ");
+        waitForInput(password);
+    }
 
     // Connect to WiFi
     WiFi.begin(ssid, password);
