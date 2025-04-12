@@ -281,7 +281,7 @@ void waitForInput(String& input) {
             }
         }
 
-        if (millis() - startTime > 300000) { // Timeout after 3 minutes
+        if (millis() - startTime > 180000) { // Timeout after 3 minutes
             M5Cardputer.Display.println("\nInput timeout. Rebooting...");
             delay(1000); // Delay for 1 second to allow the message to be displayed
             ESP.restart(); // Reboot the ESP32
